@@ -1,6 +1,6 @@
 #! python3
 
-from Restaurants import *
+from Restaurants import Restaurant, Order, OrderStatus
 
 
 def Main():
@@ -14,8 +14,10 @@ def Main():
     my_order = Order("John", ["Burger", "Fries"], BagBite.get_items())
     my_order1 = Order("Sindre")
     my_order1.add_item("Pizza", BagBite.get_items())
+    my_order2 = Order("Peder", ["Shake", "Salad"], BagBite.get_items())
     BagBite.add_order(my_order)
     BagBite.add_order(my_order1)
+    BagBite.add_order(my_order2)
     my_order1.set_status(OrderStatus.IN_PROGRESS)
     for order in BagBite.orders_list:
         print(order)

@@ -13,13 +13,20 @@ DEFAULT_ITEMS = {"Burger": 10.99,
                  "Soda": 1.99,
                  "Water": 0.00}
 
-DEFAULT_OPENING_HOURS = {date(2023,11,13): (datetime(2023,11,13,12,0), datetime(2023,11,13,20,0)),
-                        date(2023,11,14): (datetime(2023,11,14,12,0), datetime(2023,11,14,20,0)),
-                        date(2023,11,15): (datetime(2023,11,15,12,0), datetime(2023,11,15,20,0)),
-                        date(2023,11,16): (datetime(2023,11,16,12,0), datetime(2023,11,16,20,0)),
-                        date(2023,11,17): (datetime(2023,11,17,12,0), datetime(2023,11,17,20,0)),
-                        date(2023,11,18): (datetime(2023,11,18,0,0), datetime(2023,11,18,0,0)),
-                        date(2023,11,19): (datetime(2023,11,19,0,0), datetime(2023,11,19,0,0))}
+DEFAULT_OPENING_HOURS = {date(2023, 11, 13): (datetime(2023, 11, 13, 12, 0), datetime(2023, 11, 13, 20, 0)),
+                         date(2023, 11, 14): (datetime(2023, 11, 14, 12, 0), datetime(2023, 11, 14, 20, 0)),
+                         date(2023, 11, 15): (datetime(2023, 11, 15, 12, 0), datetime(2023, 11, 15, 20, 0)),
+                         date(2023, 11, 16): (datetime(2023, 11, 16, 12, 0), datetime(2023, 11, 16, 20, 0)),
+                         date(2023, 11, 17): (datetime(2023, 11, 17, 12, 0), datetime(2023, 11, 17, 20, 0)),
+                         date(2023, 11, 18): (datetime(2023, 11, 18, 0, 0), datetime(2023, 11, 18, 0, 0)),
+                         date(2023, 11, 19): (datetime(2023, 11, 19, 0, 0), datetime(2023, 11, 19, 0, 0)),
+                         date(2023, 11, 20): (datetime(2023, 11, 13, 12, 0), datetime(2023, 11, 13, 20, 0)),
+                         date(2023, 11, 21): (datetime(2023, 11, 14, 12, 0), datetime(2023, 11, 14, 20, 0)),
+                         date(2023, 11, 22): (datetime(2023, 11, 15, 12, 0), datetime(2023, 11, 15, 20, 0)),
+                         date(2023, 11, 23): (datetime(2023, 11, 16, 12, 0), datetime(2023, 11, 16, 20, 0)),
+                         date(2023, 11, 24): (datetime(2023, 11, 17, 12, 0), datetime(2023, 11, 17, 20, 0)),
+                         date(2023, 11, 25): (datetime(2023, 11, 18, 0, 0), datetime(2023, 11, 18, 0, 0)),
+                         date(2023, 11, 26): (datetime(2023, 11, 19, 0, 0), datetime(2023, 11, 19, 0, 0))}
 
 
 class OrderStatus(Enum):
@@ -32,22 +39,25 @@ class OrderStatus(Enum):
     def __str__(self) -> str:
         return self.name
 
+    def __gt__(self, other) -> bool:
+        return self.value > other.value
+
 
 class Order():
     """Order class to keep track of orders"""
     number_of_orders = 1
 
     def __init__(self, customer_name: str, order_items: list = [], items: dict = DEFAULT_ITEMS):
-        self.order_number = Order.number_of_orders
-        self.time = datetime.now()
+        self.number = Order.number_of_orders
         Order.number_of_orders += 1
+        self.time = datetime.now()
         self.customer_name = customer_name
         self.order_items = order_items
         self.total_amount = sum([items[item] for item in self.order_items])
         self.status = OrderStatus.NEW
 
-    def get_order_number(self) -> int:
-        return self.order_number
+    def get_number(self) -> int:
+        return self.number
 
     def get_customer_name(self) -> str:
         return self.customer_name
@@ -79,11 +89,14 @@ class Order():
         self.status = status
 
     def __str__(self) -> str:
-        print(f"Order #{self.order_number} by {self.customer_name}, total_amount: {self.total_amount}, status: {self.status}")
-        print("Items:")
+        order_string = (f"Order #{self.number} by {self.customer_name}"
+                        f"\n At {self.time.strftime('%H:%M %d/%m/%Y')}"
+                        f"\nTotal_amount: {self.total_amount}"
+                        f"\n Status: {self.status}"
+                        f"\nItems:")
         for item in self.order_items:
-            print(f"\t{item}")
-        return ""
+            order_string += (f"\n\t{item}")
+        return order_string
 
 
 class Restaurant():
@@ -107,10 +120,10 @@ class Restaurant():
     def get_opening_hours_date(self, date: date) -> tuple:
         return self.opening_hours[date]
 
-    def set_opening_hours(self, date:date, opening_time: datetime, closing_time: datetime) -> None:
+    def set_opening_hours(self, date: date, opening_time: datetime, closing_time: datetime) -> None:
         if closing_time < opening_time:
             raise ValueError("Closing time must be after opening time")
-        self.opening_hours[day] = (opening_time, closing_time)
+        self.opening_hours[date] = (opening_time, closing_time)
 
     def get_orders(self) -> list:
         return self.orders_list
@@ -118,25 +131,25 @@ class Restaurant():
     def add_order(self, order: Order) -> None:
         self.orders_list.append(order)
 
-    def get_order(self, order_number: int) -> Order:
+    def get_order(self, number: int) -> Order:
         for order in self.orders_list:
-            if order.order_number == order_number:
+            if order.number == number:
                 return order
-        return None
+        raise ValueError(f"Found no order with order number {number}")
 
     def get_open_dates(self) -> list:
         """Returns a list of all dates the restaurant is open"""
         dates = []
-        for date in self.opening_hours:
-            if self.opening_hours[date][1] > self.opening_hours[date][0]:
-                dates.append(date)
+        for day in self.opening_hours:
+            if self.opening_hours[day][1] > self.opening_hours[day][0]:
+                dates.append(day)
         return dates
 
     def avg_open_hours_week(self) -> float:
         """Returns the average number of open hours per week for all dates in the opening_hours dict"""
         total = timedelta()
-        for date in self.opening_hours:
-            opening_time, closing_time = self.get_opening_hours_date(date)
+        for day in self.opening_hours:
+            opening_time, closing_time = self.get_opening_hours_date(day)
             total += closing_time - opening_time
         number_of_weeks = len(self.opening_hours) / 7
         total_hours = total.total_seconds() / 3600
