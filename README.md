@@ -28,3 +28,6 @@ This file has the functions used in the frontend, togheter with the html templat
     - Statistics
     - Orders
     - Opening Hours
+
+#### styling
+flake8 --max-line-length 128

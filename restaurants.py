@@ -4,6 +4,9 @@ from enum import Enum
 from datetime import datetime, timedelta, date
 from math import ceil
 
+# TODO stop mixing "dates" and "days"
+
+# Mock menu
 DEFAULT_ITEMS = {"Burger": 10.99,
                  "Fries": 2.99,
                  "Shake": 3.99,
@@ -14,6 +17,7 @@ DEFAULT_ITEMS = {"Burger": 10.99,
                  "Soda": 1.99,
                  "Water": 0.00}
 
+# Mock opening hours
 DEFAULT_OPENING_HOURS = {date(2023, 11, 13): (datetime(2023, 11, 13, 12, 0), datetime(2023, 11, 13, 20, 0)),
                          date(2023, 11, 14): (datetime(2023, 11, 14, 12, 0), datetime(2023, 11, 14, 20, 0)),
                          date(2023, 11, 15): (datetime(2023, 11, 15, 12, 0), datetime(2023, 11, 15, 20, 0)),
@@ -92,21 +96,21 @@ class Order():
     def __str__(self) -> str:
         order_string = (f"Order #{self.number} by {self.customer_name}"
                         f"\n At {self.time.strftime('%H:%M %d/%m/%Y')}"
-                        f"\nTotal_amount: {self.total_amount}"
+                        f"\nTotal_amount: {self.total_amount}$"
                         f"\n Status: {self.status}"
                         f"\nItems:")
         for item in self.order_items:
-            order_string += (f"\n\t{item}")
+            order_string += (f"\n\t- {item}")
         return order_string
 
 
 class Restaurant():
-    """A simple attempt to model a restaurant"""
+    """Restaurant class to keep track class variables and methods"""
 
-    def __init__(self, restaurant_name):
+    def __init__(self, restaurant_name, items: dict = DEFAULT_ITEMS, opening_hours: dict = DEFAULT_OPENING_HOURS):
         self.restaurant_name = restaurant_name
-        self.items = DEFAULT_ITEMS
-        self.opening_hours = DEFAULT_OPENING_HOURS
+        self.items = items
+        self.opening_hours = opening_hours
         self.orders_list = []
 
     def get_name(self) -> str:
@@ -119,6 +123,7 @@ class Restaurant():
         return self.opening_hours
 
     def get_opening_hours_date(self, date: date) -> tuple:
+        """Returns the opening hours for a given date"""
         return self.opening_hours[date]
 
     def set_opening_hours(self, date: date, opening_time: datetime, closing_time: datetime) -> None:
@@ -147,7 +152,11 @@ class Restaurant():
         return dates
 
     def avg_open_hours_week(self) -> float:
-        """Returns the average number of open hours per week for all dates in the opening_hours dict"""
+        """
+        Returns the average number of open hours per week, using all dates in the opening_hours dict dividing
+        by 7 and rounding up to the nearest integer to get number of weeks
+        TODO: Make it so the number of weeks is dependent on the dates and not just the number of days
+        """
         total = timedelta()
         for day in self.opening_hours:
             opening_time, closing_time = self.get_opening_hours_date(day)
