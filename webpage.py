@@ -74,11 +74,12 @@ def change_opening_hours():
     day_str = datetime.strptime(request.form['day'], '%Y-%m-%d')
     day = date(day_str.year, day_str.month, day_str.day)
     week_number = int(request.form['week_number'])
-    opening_time = request.form['opening_time']
-    closing_time = request.form['closing_time']
+    opening_time = datetime.strptime(request.form['opening_time'], '%H:%M')
+    closing_time = datetime.strptime(request.form['closing_time'], '%H:%M')
 
     # Change the opening hours for the specified day
     BagBite.set_opening_hours(day, opening_time, closing_time)
+    opening_hours = get_opening_hours_for_week(week_number)
     return render_template('opening_hours.html', week_number=week_number, opening_hours=opening_hours)
 
 @app.route('/statistics')

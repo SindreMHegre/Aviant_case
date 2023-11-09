@@ -2,6 +2,7 @@
 
 from enum import Enum
 from datetime import datetime, timedelta, date
+from math import ceil
 
 DEFAULT_ITEMS = {"Burger": 10.99,
                  "Fries": 2.99,
@@ -151,7 +152,7 @@ class Restaurant():
         for day in self.opening_hours:
             opening_time, closing_time = self.get_opening_hours_date(day)
             total += closing_time - opening_time
-        number_of_weeks = len(self.opening_hours) / 7
+        number_of_weeks = ceil(len(self.opening_hours) / 7)
         total_hours = total.total_seconds() / 3600
         return total_hours/number_of_weeks
 
