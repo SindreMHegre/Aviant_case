@@ -1,7 +1,7 @@
 #! python3
 
 from enum import Enum
-from Time import Time, Weekday
+from datetime import datetime, timedelta, date
 
 DEFAULT_ITEMS = {"Burger": 10.99,
                  "Fries": 2.99,
@@ -13,13 +13,13 @@ DEFAULT_ITEMS = {"Burger": 10.99,
                  "Soda": 1.99,
                  "Water": 0.00}
 
-DEFAULT_OPENING_HOURS = {Weekday(0): (Time(12, 0), Time(20, 0)),
-                         Weekday(1): (Time(12, 0), Time(20, 0)),
-                         Weekday(2): (Time(12, 0), Time(20, 0)),
-                         Weekday(3): (Time(12, 0), Time(20, 0)),
-                         Weekday(4): (Time(12, 0), Time(20, 0)),
-                         Weekday(5): (Time(0, 0), Time(0, 0)),
-                         Weekday(6): (Time(0, 0), Time(0, 0))}
+DEFAULT_OPENING_HOURS = {date(2023,11,13): (datetime(2023,11,13,12,0), datetime(2023,11,13,20,0)),
+                        date(2023,11,14): (datetime(2023,11,14,12,0), datetime(2023,11,14,20,0)),
+                        date(2023,11,15): (datetime(2023,11,15,12,0), datetime(2023,11,15,20,0)),
+                        date(2023,11,16): (datetime(2023,11,16,12,0), datetime(2023,11,16,20,0)),
+                        date(2023,11,17): (datetime(2023,11,17,12,0), datetime(2023,11,17,20,0)),
+                        date(2023,11,18): (datetime(2023,11,18,0,0), datetime(2023,11,18,0,0)),
+                        date(2023,11,19): (datetime(2023,11,19,0,0), datetime(2023,11,19,0,0))}
 
 
 class OrderStatus(Enum):
@@ -39,14 +39,24 @@ class Order():
 
     def __init__(self, customer_name: str, order_items: list = [], items: dict = DEFAULT_ITEMS):
         self.order_number = Order.number_of_orders
+        self.time = datetime.now()
         Order.number_of_orders += 1
         self.customer_name = customer_name
         self.order_items = order_items
         self.total_amount = sum([items[item] for item in self.order_items])
         self.status = OrderStatus.NEW
 
+    def get_order_number(self) -> int:
+        return self.order_number
+
     def get_customer_name(self) -> str:
         return self.customer_name
+
+    def get_time(self) -> datetime:
+        return self.time
+
+    def set_time(self, time: datetime):
+        self.time = time
 
     def get_items(self) -> list:
         return self.order_items
@@ -94,21 +104,13 @@ class Restaurant():
     def get_opening_hours(self) -> dict:
         return self.opening_hours
 
-    def get_opening_hours_day(self, day: Weekday) -> tuple:
-        return self.opening_hours[day]
+    def get_opening_hours_date(self, date: date) -> tuple:
+        return self.opening_hours[date]
 
-    def set_opening_hours(self, day: Weekday, opening_time: Time, closing_time: Time) -> None:
+    def set_opening_hours(self, date:date, opening_time: datetime, closing_time: datetime) -> None:
+        if closing_time < opening_time:
+            raise ValueError("Closing time must be after opening time")
         self.opening_hours[day] = (opening_time, closing_time)
-
-    def get_open_days(self) -> int:
-        return [day for day in self.opening_hours if is_open(self.opening_hours[day])]
-
-    def get_num_open_hours(self) -> Time:
-        sum = Time(0, 0)
-        for day in self.opening_hours:
-            opening_time, closing_time = self.get_opening_hours_day(day)
-            sum += closing_time - opening_time
-        return sum
 
     def get_orders(self) -> list:
         return self.orders_list
@@ -122,9 +124,26 @@ class Restaurant():
                 return order
         return None
 
+    def get_open_dates(self) -> list:
+        """Returns a list of all dates the restaurant is open"""
+        dates = []
+        for date in self.opening_hours:
+            if self.opening_hours[date][1] > self.opening_hours[date][0]:
+                dates.append(date)
+        return dates
 
-def is_open(opening_hours: tuple) -> bool:
-    """Check if the restaurant is open given the opening hours"""
-    if (opening_hours[1] - opening_hours[0]):
-        return True
-    return False
+    def avg_open_hours_week(self) -> float:
+        """Returns the average number of open hours per week for all dates in the opening_hours dict"""
+        total = timedelta()
+        for date in self.opening_hours:
+            opening_time, closing_time = self.get_opening_hours_date(date)
+            total += closing_time - opening_time
+        number_of_weeks = len(self.opening_hours) / 7
+        total_hours = total.total_seconds() / 3600
+        return total_hours/number_of_weeks
+
+    def avg_orders_per_day(self) -> float:
+        """Returns the average number of orders per open day"""
+        total_orders = len(self.orders_list)
+        total_days = len(self.get_open_dates())
+        return total_orders/total_days
