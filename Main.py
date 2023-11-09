@@ -1,7 +1,6 @@
 #! python3
 
 from Restaurants import *
-from Time import Weekday
 
 
 def Main():
@@ -21,8 +20,8 @@ def Main():
     for order in BagBite.orders_list:
         print(order)
 
-    print(BagBite.get_open_days())
-    print(BagBite.get_num_open_hours())
+    print(f"Average opening hours per week: {BagBite.avg_open_hours_week()}")
+    print(f"Average orders per day: {BagBite.avg_orders_per_day()}")
 
 
 if __name__ == "__main__":
