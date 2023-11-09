@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{restaurant.get_name()}}</title>
+    <style>
+        .menu-button {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 10px;
+            font-size: 20px;
+            color: #fff;
+            background-color: #007BFF;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+        }
+        .menu-button:hover {Home
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Signed into {{ restaurant.get_name() }}</h1>
+    <a href="/orders" class="menu-button">View Orders</a>
+    <a href="/opening_hours" class="menu-button">Opening Hours</a>
+    <a href="/statistics" class="menu-button">Statistics</a>
+</body>
+</html>

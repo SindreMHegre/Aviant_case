@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Orders</title>
+    <style>
+        .orders-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+            padding: 10px;
+        }
+        .order {
+            border: 1px solid #ccc;
+            padding: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Orders</h1>
+    {% for status, orders_group in orders|groupby('status') %}
+        <h2>{{ status.name }}</h2>
+        <div class="orders-grid">
+            {% for order in orders_group %}
+                <div class="order">
+                    <p>{{ order.__str__().replace('\n', '<br>')|safe }}</p>
+                    <form action="/orders" method="post">
+                        <input type="hidden" name="order_number" value="{{ order.number }}">
+                        <select name="status">
+                            {% for status in OrderStatus %}
+                                <option value="{{ status.name }}" {% if status == order.status %}selected{% endif %}>{{ status.name }}</option>
+                            {% endfor %}
+                        </select>
+                        <input type="submit" value="Change Status">
+                    </form>
+                </div>
+            {% endfor %}
+        </div>
+    {% endfor %}
+    <a href="/">Back to Menu</a>
+</body>
+</html>

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Opening Hours</title>
+    <style>
+        .opening-hours-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+            padding: 10px;
+        }
+        .day {
+            border: 1px solid #ccc;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .change-button {
+            margin-top: 10px;
+            padding: 5px 10px;
+            font-size: 14px;
+            color: #fff;
+            background-color: #007BFF;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+        }
+        .change-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Opening Hours for Week {{ week_number }}</h1>
+    <form action="/opening_hours" method="post">
+        <input type="hidden" name="week_number" value="{{ week_number - 1 }}">
+        <input type="submit" value="<">
+    </form>
+    <form action="/opening_hours" method="post">
+        <input type="hidden" name="week_number" value="{{ week_number + 1 }}">
+        <input type="submit" value=">">
+    </form>
+    <div class="opening-hours-grid">
+        {% for day, hours in opening_hours %}
+            <div class="day">
+                <p>{{ day.strftime('%A %d.%m.%Y') }}</p>
+                {% if hours %}
+                    <p>{{ hours[0].strftime('%H:%M') }} - {{ hours[1].strftime('%H:%M') }}</p>
+                {% else %}
+                    <p>Closed</p>
+                {% endif %}
+                <form action="/change_opening_hours" method="post">
+                    <input type="hidden" name="day" value="{{ day }}">
+                    <input type="hidden" name="week_number" value="{{ week_number }}">
+                    <input type="time" name="opening_time" required>
+                    <input type="time" name="closing_time" required>
+                    <input type="submit" value="Change" class="change-button">
+                </form>
+            </div>
+        {% endfor %}
+    </div>
+</body>
+</html>
